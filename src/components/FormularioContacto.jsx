@@ -1,18 +1,14 @@
-// Importa hook para manejar estado del formulario.
 import { useState } from "react";
 
-// Componente de formulario para crear un contacto.
 export default function FormularioContacto({ onAgregar }) {
-
-  // Estado local con los campos del formulario.
   const [form, setForm] = useState({
     nombre: "",
-    correo: "",
     telefono: "",
+    correo: "",
     etiqueta: "",
   });
 
-  // Actualiza un campo del formulario cuando el usuario escribe.
+  // Actualizar los campos
   const onChange = (e) => {
     const { name, value } = e.target;
 
@@ -22,26 +18,28 @@ export default function FormularioContacto({ onAgregar }) {
     }));
   };
 
-  // Controla el envío del formulario.
+  // Enviar formulario
   const onSubmit = (e) => {
-
-    // Evita que el navegador recargue la página.
     e.preventDefault();
 
-    // Valida nombre y teléfono.
-    if (!form.nombre.trim() || !form.telefono.trim()) {
-      alert("Completa al menos Nombre y Teléfono");
+    // Validación
+    if (
+      !form.nombre.trim() ||
+      !form.telefono.trim() ||
+      !form.correo.trim()
+    ) {
+      alert("Completa Nombre, Teléfono y Correo");
       return;
     }
 
-    // Envía los datos al componente padre.
+    // Agregar contacto
     onAgregar(form);
 
-    // Limpia el formulario.
+    // Limpiar formulario
     setForm({
       nombre: "",
-      correo: "",
       telefono: "",
+      correo: "",
       etiqueta: "",
     });
   };
@@ -52,52 +50,76 @@ export default function FormularioContacto({ onAgregar }) {
       className="max-w-2xl mx-auto bg-white p-6 rounded-2xl shadow-lg border border-gray-200"
     >
 
-      {/* Título del formulario */}
+      {/* Título */}
       <h2 className="text-2xl font-bold text-gray-800 mb-6">
         Agregar contacto
       </h2>
 
       {/* Nombre */}
-      <input
-        name="nombre"
-        placeholder="Nombre"
-        value={form.nombre}
-        onChange={onChange}
-        className="w-full border border-gray-300 rounded-lg p-3 mb-3 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
+      <div className="mb-4">
+        <label className="block text-gray-700 font-semibold mb-2">
+          Nombre *
+        </label>
+
+        <input
+          name="nombre"
+          placeholder="Ej: Carolina Pérez"
+          value={form.nombre}
+          onChange={onChange}
+          className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
       {/* Teléfono */}
-      <input
-        name="telefono"
-        placeholder="Teléfono"
-        value={form.telefono}
-        onChange={onChange}
-        className="w-full border border-gray-300 rounded-lg p-3 mb-3 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
+      <div className="mb-4">
+        <label className="block text-gray-700 font-semibold mb-2">
+          Teléfono *
+        </label>
+
+        <input
+          name="telefono"
+          placeholder="Ej: 300 123 4567"
+          value={form.telefono}
+          onChange={onChange}
+          className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
       {/* Correo */}
-      <input
-        type="email"
-        name="correo"
-        placeholder="Correo"
-        value={form.correo}
-        onChange={onChange}
-        className="w-full border border-gray-300 rounded-lg p-3 mb-3 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
+      <div className="mb-4">
+        <label className="block text-gray-700 font-semibold mb-2">
+          Correo *
+        </label>
+
+        <input
+          type="email"
+          name="correo"
+          placeholder="Ej: carolina@sena.edu.co"
+          value={form.correo}
+          onChange={onChange}
+          className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
       {/* Etiqueta */}
-      <input
-        name="etiqueta"
-        placeholder="Etiqueta (opcional)"
-        value={form.etiqueta}
-        onChange={onChange}
-        className="w-full border border-gray-300 rounded-lg p-3 mb-5 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
+      <div className="mb-5">
+        <label className="block text-gray-700 font-semibold mb-2">
+          Etiqueta
+        </label>
+
+        <input
+          name="etiqueta"
+          placeholder="Ej: Compañera"
+          value={form.etiqueta}
+          onChange={onChange}
+          className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
       {/* Botón */}
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition duration-200"
+        className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition duration-200"
       >
         ➕ Agregar contacto
       </button>

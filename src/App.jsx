@@ -1,46 +1,40 @@
-// Importa el hook para manejar estado local.
-import { useState } from "react";
-
-// Importa la tarjeta visual para cada contacto.
+import { useState, useEffect } from "react";
+import FormularioContacto from "./components/FormularioContacto";
 import ContactoCard from "./components/ContactoCard";
 
-// Importa el formulario para crear contactos.
-import FormularioContacto from "./components/FormularioContacto";
-
-// Componente principal de la agenda.
 export default function App() {
-  // Estado: lista de contactos inicial con un ejemplo.
-  const [contactos, setContactos] = useState([
-    {
-      id: 1,
-      nombre: "Carolina Pérez",
-      telefono: "300 123 4567",
-      correo: "carolina@sena.edu.co",
-      etiqueta: "Compañera",
-    },
-  ]);
+  // Carga inicial desde localStorage
+  const contactosGuardados =
+    JSON.parse(localStorage.getItem("contactos")) || [];
 
-  // Agrega un nuevo contacto al estado.
+  const [contactos, setContactos] = useState(contactosGuardados);
+
+  // Guardar cada vez que cambie el estado
+  useEffect(() => {
+    localStorage.setItem(
+      "contactos",
+      JSON.stringify(contactos)
+    );
+  }, [contactos]);
+
+  // Agregar nuevo contacto
   const agregarContacto = (nuevo) => {
-    setContactos((prev) => [
-      ...prev,
-      { id: Date.now(), ...nuevo },
-    ]);
+    setContactos((prev) => [...prev, nuevo]);
   };
 
-  // Elimina un contacto por su id.
-  const eliminarContacto = (id) => {
+  // Eliminar contacto por correo
+  const eliminarContacto = (correo) => {
     setContactos((prev) =>
-      prev.filter((c) => c.id !== id)
+      prev.filter((c) => c.correo !== correo)
     );
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 py-10 px-4">
+    <main className="min-h-screen bg-gray-100 px-4 py-10">
 
-      {/* Título principal */}
+      {/* Título */}
       <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">
-        Agenda ADSO v2 📒
+        Agenda ADSO v3 📒
       </h1>
 
       {/* Formulario */}
@@ -50,13 +44,9 @@ export default function App() {
       <section className="max-w-2xl mx-auto mt-8 space-y-4">
         {contactos.map((c) => (
           <ContactoCard
-            key={c.id}
-            id={c.id}
-            nombre={c.nombre}
-            telefono={c.telefono}
-            correo={c.correo}
-            etiqueta={c.etiqueta}
-            onDelete={eliminarContacto}
+            key={c.correo}
+            {...c}
+            onEliminar={eliminarContacto}
           />
         ))}
       </section>
