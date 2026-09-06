@@ -1,138 +1,66 @@
+// Importa el hook para manejar estado local.
 import { useState } from "react";
+
+// Importa la tarjeta visual para cada contacto.
 import ContactoCard from "./components/ContactoCard";
 
-function App() {
+// Importa el formulario para crear contactos.
+import FormularioContacto from "./components/FormularioContacto";
+
+// Componente principal de la agenda.
+export default function App() {
+  // Estado: lista de contactos inicial con un ejemplo.
   const [contactos, setContactos] = useState([
     {
-      nombre: "Gustavo Bolaños",
+      id: 1,
+      nombre: "Carolina Pérez",
       telefono: "300 123 4567",
-      correo: "gustavo@sena.edu.co",
-      etiqueta: "Instructor",
-    },
-    {
-      nombre: "Cristian Acevedo",
-      telefono: "300 765 4321",
-      correo: "cristian@sena.edu.co",
-      etiqueta: "Instructor",
+      correo: "carolina@sena.edu.co",
+      etiqueta: "Compañera",
     },
   ]);
 
-  const [formulario, setFormulario] = useState({
-    nombre: "",
-    telefono: "",
-    correo: "",
-    etiqueta: "",
-  });
-
-  const manejarCambio = (e) => {
-    setFormulario({
-      ...formulario,
-      [e.target.name]: e.target.value,
-    });
+  // Agrega un nuevo contacto al estado.
+  const agregarContacto = (nuevo) => {
+    setContactos((prev) => [
+      ...prev,
+      { id: Date.now(), ...nuevo },
+    ]);
   };
 
-  const agregarContacto = (e) => {
-    e.preventDefault();
-
-    if (
-      !formulario.nombre ||
-      !formulario.telefono ||
-      !formulario.correo ||
-      !formulario.etiqueta
-    ) {
-      alert("Por favor completa todos los campos");
-      return;
-    }
-
-    setContactos([...contactos, formulario]);
-
-    setFormulario({
-      nombre: "",
-      telefono: "",
-      correo: "",
-      etiqueta: "",
-    });
+  // Elimina un contacto por su id.
+  const eliminarContacto = (id) => {
+    setContactos((prev) =>
+      prev.filter((c) => c.id !== id)
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <main className="min-h-screen bg-gray-100 py-10 px-4">
 
-      <h1 className="text-4xl font-bold text-center text-blue-600 mb-2">
-        Agenda ADSO 📒
+      {/* Título principal */}
+      <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">
+        Agenda ADSO v2 📒
       </h1>
 
-      <p className="text-center text-gray-600 mb-8">
-        Contactos guardados
-      </p>
+      {/* Formulario */}
+      <FormularioContacto onAgregar={agregarContacto} />
 
-      {/* FORMULARIO */}
-      <form
-        onSubmit={agregarContacto}
-        className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8"
-      >
-        <h2 className="text-2xl font-bold mb-5 text-gray-800">
-          Agregar contacto
-        </h2>
-
-        <input
-          type="text"
-          name="nombre"
-          placeholder="Nombre"
-          value={formulario.nombre}
-          onChange={manejarCambio}
-          className="w-full border p-3 rounded-lg mb-3"
-        />
-
-        <input
-          type="text"
-          name="telefono"
-          placeholder="Teléfono"
-          value={formulario.telefono}
-          onChange={manejarCambio}
-          className="w-full border p-3 rounded-lg mb-3"
-        />
-
-        <input
-          type="email"
-          name="correo"
-          placeholder="Correo"
-          value={formulario.correo}
-          onChange={manejarCambio}
-          className="w-full border p-3 rounded-lg mb-3"
-        />
-
-        <input
-          type="text"
-          name="etiqueta"
-          placeholder="Etiqueta (Ej: Instructor)"
-          value={formulario.etiqueta}
-          onChange={manejarCambio}
-          className="w-full border p-3 rounded-lg mb-4"
-        />
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700"
-        >
-          ➕ Agregar contacto
-        </button>
-      </form>
-
-      {/* CONTACTOS */}
-      <div className="max-w-2xl mx-auto space-y-4">
-        {contactos.map((c, i) => (
+      {/* Lista de contactos */}
+      <section className="max-w-2xl mx-auto mt-8 space-y-4">
+        {contactos.map((c) => (
           <ContactoCard
-            key={i}
+            key={c.id}
+            id={c.id}
             nombre={c.nombre}
             telefono={c.telefono}
             correo={c.correo}
             etiqueta={c.etiqueta}
+            onDelete={eliminarContacto}
           />
         ))}
-      </div>
+      </section>
 
-    </div>
+    </main>
   );
 }
-
-export default App;
