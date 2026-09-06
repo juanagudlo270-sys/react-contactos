@@ -34,7 +34,7 @@ export default function App() {
 
       {/* Título */}
       <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">
-        Agenda ADSO v3 📒
+        Agenda ADSO v3 CON TAILWIND CSS📒
       </h1>
 
       {/* Formulario */}
