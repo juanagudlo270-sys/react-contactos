@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import FormularioContacto from "./components/FormularioContacto";
 import ContactoCard from "./components/ContactoCard";
 import BarraBusqueda from "./components/BarraBusqueda";
+import Paginador from "./components/Paginador";
 import { buscarContactos } from "./utils/busqueda.js";
 import { ordenarContactos } from "./utils/ordenamiento.js";
+import { CONTACTOS_POR_PAGINA_INICIAL } from "./utils/paginacion.js";
 import {
   listarContactos,
   crearContacto,
@@ -18,6 +20,14 @@ export default function App() {
   const [exito, setExito] = useState(""); // mensaje de éxito (mini reto clase 8)
   const [busqueda, setBusqueda] = useState(""); // texto del buscador (clase 9)
   const [orden, setOrden] = useState("original"); // criterio de orden (clase 9)
+
+  // Paginación (clase 10)
+  // Página que se está mostrando ahora mismo (empieza en 1, no en 0)
+  const [paginaActual, setPaginaActual] = useState(1);
+  // Cuántos contactos mostrar por página (configurable: mini reto)
+  const [contactosPorPagina, setContactosPorPagina] = useState(
+    CONTACTOS_POR_PAGINA_INICIAL
+  );
 
   // GET — se ejecuta UNA vez al montar el componente
   useEffect(() => {
@@ -87,21 +97,55 @@ export default function App() {
     }
   };
 
-  // Lista que se muestra: primero BÚSQUEDA LINEAL, luego BUBBLE SORT.
-  // Se calcula en cada render a partir del estado; `contactos` nunca se modifica.
-  const contactosVisibles = ordenarContactos(
+  // Lista filtrada y ordenada: primero BÚSQUEDA LINEAL (clase 9), luego
+  // BUBBLE SORT (clase 9). Se calcula en cada render a partir del estado;
+  // `contactos` nunca se modifica.
+  const contactosOrdenados = ordenarContactos(
     buscarContactos(contactos, busqueda),
     orden
   );
+
+  // Paginación (clase 10): se aplica DESPUÉS de buscar y ordenar.
+  // Math.ceil redondea hacia arriba: 7 contactos / 3 por página = 2.33 → 3 páginas.
+  // Math.max(1, ...) evita "0 páginas" cuando no hay resultados.
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(contactosOrdenados.length / contactosPorPagina)
+  );
+
+  // Con página 1 y 3 por página: (1-1)*3 = 0 → empieza en el índice 0.
+  // .slice() no modifica el arreglo original: devuelve un pedazo nuevo.
+  const indiceInicio = (paginaActual - 1) * contactosPorPagina;
+  const indiceFin = indiceInicio + contactosPorPagina;
+  const contactosPaginados = contactosOrdenados.slice(indiceInicio, indiceFin);
+
+  // Al cambiar lo que se busca, el orden o el tamaño de página, volvemos a la
+  // página 1 (si no, podríamos quedarnos en una página que ya no existe).
+  // Dependencias: las CAUSAS reales, no `contactosOrdenados` (ese array es
+  // nuevo en cada render y reiniciaría la página en cada tecla sin razón).
+  useEffect(() => {
+    // La guía de la clase usa este patrón; el linter de hooks v7 lo marca.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPaginaActual(1);
+  }, [busqueda, orden, contactosPorPagina]);
+
+  // Si el total de páginas baja (por ejemplo al eliminar el último contacto de
+  // la última página), no nos quedamos viendo una página vacía o inexistente.
+  useEffect(() => {
+    if (paginaActual > totalPaginas) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPaginaActual(totalPaginas);
+    }
+  }, [paginaActual, totalPaginas]);
 
   return (
     <main className="min-h-screen bg-gray-100 px-4 py-10">
       {/* Título */}
       <h1 className="text-4xl font-bold text-center text-blue-600 mb-2">
-        Agenda ADSO v7 📒
+        Agenda ADSO v8 📒
       </h1>
       <p className="text-center text-gray-500 mb-8">
-        Gestión de contactos con validaciones, búsqueda y ordenamiento.
+        Gestión de contactos con validaciones, búsqueda, orden y paginación.
       </p>
 
       {/* Banner de error global (errores de la API) */}
@@ -134,8 +178,10 @@ export default function App() {
           onBusqueda={setBusqueda}
           orden={orden}
           onOrden={setOrden}
+          contactosPorPagina={contactosPorPagina}
+          onContactosPorPagina={setContactosPorPagina}
           total={contactos.length}
-          mostrados={contactosVisibles.length}
+          encontrados={contactosOrdenados.length}
         />
       )}
 
@@ -152,7 +198,7 @@ export default function App() {
         )}
 
         {/* Hay contactos, pero ninguno coincide con la búsqueda */}
-        {!cargando && contactos.length > 0 && contactosVisibles.length === 0 && (
+        {!cargando && contactos.length > 0 && contactosOrdenados.length === 0 && (
           <div className="text-center text-gray-500">
             <p>No se encontraron contactos para «{busqueda.trim()}».</p>
             <button
@@ -165,7 +211,8 @@ export default function App() {
           </div>
         )}
 
-        {contactosVisibles.map((c) => (
+        {/* Solo la página actual (slice), no toda la lista */}
+        {contactosPaginados.map((c) => (
           <ContactoCard
             key={c.id}
             {...c}
@@ -173,6 +220,15 @@ export default function App() {
           />
         ))}
       </section>
+
+      {/* Controles de paginación (solo si hay resultados que paginar) */}
+      {!cargando && contactosOrdenados.length > 0 && (
+        <Paginador
+          paginaActual={paginaActual}
+          totalPaginas={totalPaginas}
+          onCambiarPagina={setPaginaActual}
+        />
+      )}
     </main>
   );
 }
