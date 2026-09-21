@@ -6,6 +6,7 @@ export default function FormularioContacto({ onAgregar }) {
     telefono: "",
     correo: "",
     etiqueta: "",
+    empresa: "", // ← nuevo campo (mini reto)
   });
 
   // Actualizar los campos
@@ -41,6 +42,7 @@ export default function FormularioContacto({ onAgregar }) {
       telefono: "",
       correo: "",
       etiqueta: "",
+      empresa: "",
     });
   };
 
@@ -96,6 +98,21 @@ export default function FormularioContacto({ onAgregar }) {
           name="correo"
           placeholder="Ej: carolina@sena.edu.co"
           value={form.correo}
+          onChange={onChange}
+          className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      {/* Empresa (mini reto) */}
+      <div className="mb-4">
+        <label className="block text-gray-700 font-semibold mb-2">
+          Empresa
+        </label>
+
+        <input
+          name="empresa"
+          placeholder="Ej: SENA"
+          value={form.empresa}
           onChange={onChange}
           className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
         />

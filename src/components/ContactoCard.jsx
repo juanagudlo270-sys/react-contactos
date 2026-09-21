@@ -3,25 +3,22 @@ export default function ContactoCard({
   telefono,
   correo,
   etiqueta,
+  empresa,
   onEliminar,
 }) {
   return (
     <article className="bg-white p-5 rounded-2xl shadow-md border border-gray-200">
-
       {/* Nombre */}
-      <h3 className="text-xl font-bold text-gray-800 mb-3">
-        {nombre}
-      </h3>
+      <h3 className="text-xl font-bold text-gray-800 mb-3">{nombre}</h3>
 
       {/* Teléfono */}
-      <p className="text-gray-600 mb-2">
-        📞 {telefono}
-      </p>
+      <p className="text-gray-600 mb-2">📞 {telefono}</p>
 
       {/* Correo */}
-      <p className="text-gray-600 mb-3">
-        ✉️ {correo}
-      </p>
+      <p className="text-gray-600 mb-2">✉️ {correo}</p>
+
+      {/* Empresa (mini reto) */}
+      {empresa && <p className="text-sm text-gray-600 mb-3">🏢 {empresa}</p>}
 
       {/* Etiqueta */}
       {etiqueta && (
@@ -30,17 +27,16 @@ export default function ContactoCard({
         </span>
       )}
 
-      {/* Botón eliminar */}
+      {/* Botón eliminar: onEliminar llega del padre como prop */}
       <div className="mt-2">
         <button
           type="button"
-          onClick={() => onEliminar(correo)}
+          onClick={onEliminar}
           className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition duration-200"
         >
           🗑️ Eliminar
         </button>
       </div>
-
     </article>
   );
 }
