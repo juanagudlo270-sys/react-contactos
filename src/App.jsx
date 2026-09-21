@@ -8,19 +8,27 @@ import {
 } from "./api.js";
 
 export default function App() {
-  // Los 3 estados: datos, carga y error
+  // Los estados: datos, carga, error y éxito
   const [contactos, setContactos] = useState([]); // lista que viene de la API
   const [cargando, setCargando] = useState(true); // true mientras esperamos la respuesta
-  const [error, setError] = useState(""); // mensaje de error si la API falla
+  const [error, setError] = useState(""); // mensaje de error (amigable) si la API falla
+  const [exito, setExito] = useState(""); // mensaje de éxito (mini reto clase 8)
 
   // GET — se ejecuta UNA vez al montar el componente
   useEffect(() => {
     async function cargarContactos() {
       try {
+        setCargando(true);
+        setError(""); // limpiamos cualquier error anterior
         const data = await listarContactos(); // GET a la API
         setContactos(data); // guardamos en estado
-      } catch {
-        setError("No se pudo cargar la lista de contactos");
+      } catch (err) {
+        // El detalle técnico va a la consola (para depurar)...
+        console.error("Error al cargar contactos:", err);
+        // ...y el usuario recibe una frase clara, sin jerga
+        setError(
+          "No se pudieron cargar los contactos. Verifica que el servidor esté encendido e intenta de nuevo."
+        );
       } finally {
         setCargando(false); // ocultamos el mensaje de carga
       }
@@ -28,15 +36,30 @@ export default function App() {
     cargarContactos();
   }, []);
 
+  // El mensaje de éxito desaparece solo a los 4 segundos
+  useEffect(() => {
+    if (!exito) return;
+    const temporizador = setTimeout(() => setExito(""), 4000);
+    return () => clearTimeout(temporizador);
+  }, [exito]);
+
   // POST — agregar contacto (llamado desde FormularioContacto)
   const agregarContacto = async (nuevo) => {
     try {
       setError("");
+      setExito("");
       const creado = await crearContacto(nuevo); // POST
       // No recargamos toda la lista: añadimos solo el nuevo
       setContactos((prev) => [...prev, creado]);
-    } catch {
-      setError("No se pudo agregar el contacto");
+      setExito("¡Contacto guardado correctamente!");
+    } catch (err) {
+      console.error("Error al crear contacto:", err);
+      setError(
+        "No se pudo guardar el contacto. Verifica tu conexión o el estado del servidor e intenta nuevamente."
+      );
+      // Volvemos a lanzar el error para que el formulario sepa que falló
+      // y NO borre lo que el usuario escribió.
+      throw err;
     }
   };
 
@@ -44,33 +67,50 @@ export default function App() {
   const eliminarContacto = async (id) => {
     try {
       setError("");
+      setExito("");
       await eliminarContactoPorId(id); // DELETE en la API
       // Filtramos el estado local sin recargar
       setContactos((prev) => prev.filter((c) => c.id !== id));
-    } catch {
-      setError("No se pudo eliminar el contacto");
+    } catch (err) {
+      console.error("Error al eliminar contacto:", err);
+      setError(
+        "No se pudo eliminar el contacto. Verifica que el servidor esté encendido e intenta de nuevo."
+      );
     }
   };
 
   return (
     <main className="min-h-screen bg-gray-100 px-4 py-10">
       {/* Título */}
-      <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">
-        Agenda ADSO v5 📒
+      <h1 className="text-4xl font-bold text-center text-blue-600 mb-2">
+        Agenda ADSO v6 📒
       </h1>
+      <p className="text-center text-gray-500 mb-8">
+        Gestión de contactos con validaciones y mejor experiencia de usuario.
+      </p>
+
+      {/* Banner de error global (errores de la API) */}
+      {error && (
+        <div
+          role="alert"
+          className="max-w-2xl mx-auto mb-6 bg-red-50 border border-red-200 rounded-xl px-4 py-3"
+        >
+          <p className="text-sm font-medium text-red-700">{error}</p>
+        </div>
+      )}
+
+      {/* Banner de éxito (mini reto) */}
+      {exito && (
+        <div
+          role="status"
+          className="max-w-2xl mx-auto mb-6 bg-green-50 border border-green-200 rounded-xl px-4 py-3"
+        >
+          <p className="text-sm font-medium text-green-700">{exito}</p>
+        </div>
+      )}
 
       {/* Formulario */}
       <FormularioContacto onAgregar={agregarContacto} />
-
-      {/* Mensaje de error */}
-      {error && (
-        <p
-          role="alert"
-          className="max-w-2xl mx-auto mt-6 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg"
-        >
-          {error}
-        </p>
-      )}
 
       {/* Lista de contactos */}
       <section className="max-w-2xl mx-auto mt-8 space-y-4">
