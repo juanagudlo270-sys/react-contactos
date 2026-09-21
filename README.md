@@ -1,8 +1,8 @@
-# Agenda ADSO v6 — Validaciones, UX y errores controlados (Clase 8)
+# Agenda ADSO v7 — Búsqueda y ordenamiento (Clase 9)
 
 Agenda de contactos en React + Vite + Tailwind conectada a una API REST simulada con JSON Server.
-En esta versión se agregan validaciones al formulario, mensajes de error claros, un estado
-"enviando" para el botón y mensajes de error de API amigables.
+La v7 suma un **buscador** (búsqueda lineal) y un **selector de orden** (Bubble Sort) sobre la
+lista de contactos. Conserva todo lo de la v6 (validaciones, estado "enviando" y errores de API amigables).
 
 ## Cómo correrlo (dos terminales al mismo tiempo)
 
@@ -25,7 +25,22 @@ npm run dev
 
 Verifica la API en el navegador: <http://localhost:3001/contactos>
 
-## Qué se agregó en la Clase 8
+## Qué se agregó en la Clase 9
+
+- **Búsqueda lineal** (`src/utils/busqueda.js`): recorre los contactos uno por uno y conserva los
+  que coinciden. Busca en nombre, teléfono, correo, empresa y etiqueta, sin distinguir mayúsculas
+  ni tildes (`angela` encuentra a *Ángela*). Complejidad O(n).
+- **Bubble Sort** (`src/utils/ordenamiento.js`): compara pares adyacentes e intercambia los
+  desordenados, repitiendo el recorrido hasta que no haya cambios. Complejidad O(n²) en el peor
+  caso. Trabaja sobre una **copia** (no muta el estado) y es estable.
+- **`src/components/BarraBusqueda.jsx`**: campo de búsqueda, botón ✕ para limpiar, selector
+  "Ordenar por" (orden de llegada / Nombre A → Z / Nombre Z → A) y contador "Mostrando X de Y".
+- **`App.jsx`**: estados `busqueda` y `orden`; la lista visible se calcula en cada render
+  (`buscarContactos` → `ordenarContactos`) sin tocar el estado `contactos`.
+- Si nada coincide, se muestra un mensaje con un botón "Limpiar búsqueda".
+- Al guardar un contacto nuevo la búsqueda se limpia, para que el nuevo siempre se vea.
+
+## Qué se agregó en la Clase 8 (sigue vigente)
 
 - **Validaciones** (`FormularioContacto.jsx` → `validarFormulario()`), usando `.trim()`:
   - Nombre obligatorio.
@@ -51,14 +66,19 @@ Verifica la API en el navegador: <http://localhost:3001/contactos>
 
 - `db.json` — base de datos simulada
 - `src/api.js` — único punto de contacto con el servidor (`listarContactos`, `crearContacto`, `eliminarContactoPorId`)
-- `src/App.jsx` — estados `contactos`, `cargando`, `error`, `exito` + GET / POST / DELETE
+- `src/App.jsx` — estados `contactos`, `cargando`, `error`, `exito`, `busqueda`, `orden` + GET / POST / DELETE
 - `src/components/FormularioContacto.jsx` — formulario con validaciones, errores por campo y estado `enviando`
 - `src/components/ContactoCard.jsx` — tarjeta de contacto
+- `src/components/BarraBusqueda.jsx` — buscador, selector de orden y contador
+- `src/utils/busqueda.js` — búsqueda lineal
+- `src/utils/ordenamiento.js` — Bubble Sort y criterios de orden
 
-## Commit exacto que pide la clase
+## Commit sugerido para la Clase 9
+
+(La guía de la clase 9 no indica un mensaje de commit; este sigue el patrón de la clase 8.)
 
 ```bash
 git add .
-git commit -m "Clase_8_Agenda_ADSO_v6_Validaciones_UX"
+git commit -m "Clase_9_Agenda_ADSO_v7_Busqueda_Ordenamiento"
 git push origin main
 ```

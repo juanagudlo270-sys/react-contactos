@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import FormularioContacto from "./components/FormularioContacto";
 import ContactoCard from "./components/ContactoCard";
+import BarraBusqueda from "./components/BarraBusqueda";
+import { buscarContactos } from "./utils/busqueda.js";
+import { ordenarContactos } from "./utils/ordenamiento.js";
 import {
   listarContactos,
   crearContacto,
@@ -13,6 +16,8 @@ export default function App() {
   const [cargando, setCargando] = useState(true); // true mientras esperamos la respuesta
   const [error, setError] = useState(""); // mensaje de error (amigable) si la API falla
   const [exito, setExito] = useState(""); // mensaje de éxito (mini reto clase 8)
+  const [busqueda, setBusqueda] = useState(""); // texto del buscador (clase 9)
+  const [orden, setOrden] = useState("original"); // criterio de orden (clase 9)
 
   // GET — se ejecuta UNA vez al montar el componente
   useEffect(() => {
@@ -51,6 +56,9 @@ export default function App() {
       const creado = await crearContacto(nuevo); // POST
       // No recargamos toda la lista: añadimos solo el nuevo
       setContactos((prev) => [...prev, creado]);
+      // Si había una búsqueda activa, la limpiamos: así el contacto recién
+      // guardado siempre se ve y el usuario no cree que "no se guardó".
+      setBusqueda("");
       setExito("¡Contacto guardado correctamente!");
     } catch (err) {
       console.error("Error al crear contacto:", err);
@@ -79,14 +87,21 @@ export default function App() {
     }
   };
 
+  // Lista que se muestra: primero BÚSQUEDA LINEAL, luego BUBBLE SORT.
+  // Se calcula en cada render a partir del estado; `contactos` nunca se modifica.
+  const contactosVisibles = ordenarContactos(
+    buscarContactos(contactos, busqueda),
+    orden
+  );
+
   return (
     <main className="min-h-screen bg-gray-100 px-4 py-10">
       {/* Título */}
       <h1 className="text-4xl font-bold text-center text-blue-600 mb-2">
-        Agenda ADSO v6 📒
+        Agenda ADSO v7 📒
       </h1>
       <p className="text-center text-gray-500 mb-8">
-        Gestión de contactos con validaciones y mejor experiencia de usuario.
+        Gestión de contactos con validaciones, búsqueda y ordenamiento.
       </p>
 
       {/* Banner de error global (errores de la API) */}
@@ -112,6 +127,18 @@ export default function App() {
       {/* Formulario */}
       <FormularioContacto onAgregar={agregarContacto} />
 
+      {/* Buscador y orden (solo si ya hay contactos que buscar) */}
+      {!cargando && contactos.length > 0 && (
+        <BarraBusqueda
+          busqueda={busqueda}
+          onBusqueda={setBusqueda}
+          orden={orden}
+          onOrden={setOrden}
+          total={contactos.length}
+          mostrados={contactosVisibles.length}
+        />
+      )}
+
       {/* Lista de contactos */}
       <section className="max-w-2xl mx-auto mt-8 space-y-4">
         {cargando && (
@@ -124,7 +151,21 @@ export default function App() {
           </p>
         )}
 
-        {contactos.map((c) => (
+        {/* Hay contactos, pero ninguno coincide con la búsqueda */}
+        {!cargando && contactos.length > 0 && contactosVisibles.length === 0 && (
+          <div className="text-center text-gray-500">
+            <p>No se encontraron contactos para «{busqueda.trim()}».</p>
+            <button
+              type="button"
+              onClick={() => setBusqueda("")}
+              className="mt-2 text-blue-600 font-semibold hover:underline"
+            >
+              Limpiar búsqueda
+            </button>
+          </div>
+        )}
+
+        {contactosVisibles.map((c) => (
           <ContactoCard
             key={c.id}
             {...c}
